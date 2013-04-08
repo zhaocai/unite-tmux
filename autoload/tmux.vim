@@ -26,9 +26,26 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+function! s:chop(str) "{{{
+  return substitute(a:str, '.$', '', '')
+endfunction "}}}
+
 " tmux#select_pane: Start unite tmux/panes to select a pane. " {{{
 function! tmux#select_pane()
     Unite -buffer-name=tmux -default-action=selectpane tmux/panes
+endfunction " }}}
+
+" tmux#selected_pane_name return selected pane's window_name " {{{
+function! tmux#selected_pane_name()
+    if empty(g:tmux_pane)
+        return ''
+    endif
+
+    let l:format = '"#{window_name}"'
+    let l:tmux_cmd = tmux#tmux_cmd(g:tmux_socket)
+
+    return s:chop(unite#util#system(
+            \ l:tmux_cmd . " list-panes -F " . l:format . " -t ". g:tmux_pane))
 endfunction " }}}
 
 " tmux#send_range: Send a range of text to g:tmux_pane. " {{{
